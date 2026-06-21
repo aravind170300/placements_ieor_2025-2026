@@ -6,7 +6,7 @@ import re
 # 1. Setup the Webpage
 st.set_page_config(page_title="Placements - IEOR 2025 - 2026", layout="wide")
 st.title("📊 Placements - IEOR 2025-2026")
-st.markdown("The companies listed here is open to IEOR department during the placement season 2025-2026 duing the Phase 1 alone. View JD for detailed description.")
+st.markdown("The companies listed here is open to IEOR department during the placement season 2025-2026 duing the Phase 1 alone(not exhaustive). View JD for detailed description.")
 st.markdown("Use the filters on the left to search and refine the data.")
 
 # 2. Load the Data
