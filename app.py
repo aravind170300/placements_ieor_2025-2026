@@ -10,7 +10,7 @@ st.markdown("Use the filters on the left to search and refine the data.")
 @st.cache_data
 def load_data():
     # skiprows=2 skips the empty rows at the top of your CSV so the headers align correctly
-    df = pd.read_csv("placement_company_sheet_ieor.xlsx", skiprows=2) 
+    df = pd.read_excel("placement_company_sheet_ieor.xlsx", skiprows=2) 
     return df
 
 try:
