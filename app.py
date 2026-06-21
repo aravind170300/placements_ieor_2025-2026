@@ -9,7 +9,7 @@ st.markdown("Use the filters on the left to search and refine the data.")
 # 2. Load the Data
 @st.cache_data
 def load_data():
-    df = pd.read_excel("placements_ieor_sheet.xlsx", skiprows=2)
+    df = pd.read_excel("placement_company_sheet_ieor.xlsx", skiprows=2)
 
     # Drop the unnamed first column (empty column A in the sheet)
     df = df.loc[:, ~df.columns.str.startswith('Unnamed')]
@@ -56,7 +56,7 @@ def make_link(filename):
     if pd.isna(filename) or str(filename).strip() == '':
         return ''
     # Base URL where your PDFs are hosted — update this to your actual URL
-    base_url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/"
+    base_url = "https://raw.githubusercontent.com/aravind170300/placements_ieor_2025-2026/main/company/"
     return f'<a href="{base_url}{filename}" target="_blank">📄 View JD</a>'
 
 display_df = filtered_df.copy()
