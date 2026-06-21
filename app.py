@@ -9,7 +9,7 @@ st.markdown("Use the filters on the left to search and refine the data.")
 # 2. Load the Data
 @st.cache_data
 def load_data():
-    df = pd.read_excel("placement_ieor_sheet.xlsx", skiprows=2)
+    df = pd.read_excel("placements_ieor_sheet.xlsx", skiprows=2)
 
     # Drop the unnamed first column (empty column A in the sheet)
     df = df.loc[:, ~df.columns.str.startswith('Unnamed')]
