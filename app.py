@@ -12,7 +12,6 @@ st.markdown("Use the filters on the left to search and refine the data.")
 @st.cache_data
 def load_data():
 
-    # --- Step 1: Read currency symbols directly from Excel cell formats ---
     wb = openpyxl.load_workbook("placements_ieor_sheet.xlsx")
     ws = wb.active
 
@@ -35,7 +34,6 @@ def load_data():
         gross_sym = extract_symbol(ws.cell(r, col_gross).number_format) if col_gross else '₹'
         currency_map[r] = (ctc_sym, gross_sym)
 
-    # --- Step 2: Load data with pandas ---
     df_raw = pd.read_excel("placements_ieor_sheet.xlsx", skiprows=2)
     df_raw = df_raw.loc[:, ~df_raw.columns.str.startswith('Unnamed')]
 
@@ -46,7 +44,6 @@ def load_data():
 
     df_raw['S.No'] = df_raw['S.No'].astype(int)
 
-    # --- Step 3: Build per-row currency symbol lists ---
     ctc_syms = [currency_map.get(header_row + 1 + i, ('₹', '₹'))[0] for i in range(len(df_raw))]
     gross_syms = [currency_map.get(header_row + 1 + i, ('₹', '₹'))[1] for i in range(len(df_raw))]
 
@@ -55,7 +52,10 @@ def load_data():
             ctc_syms[i] = ctc_syms[i - 1]
             gross_syms[i] = gross_syms[i - 1]
 
-    # --- Step 4: Format amounts with correct symbol ---
+    # Store raw numeric values for sorting before formatting
+    df_raw['_ctc_raw'] = df_raw['CTC(p.a)'].copy()
+    df_raw['_gross_raw'] = df_raw['Gross(p.a)'].copy()
+
     def format_currency(amount, symbol):
         if pd.isna(amount) or amount == '':
             return ''
@@ -91,8 +91,8 @@ except Exception as e:
 # 3. Sidebar Filters
 st.sidebar.header("🔍 Filter Options")
 
-# --- Column visibility filter ---
-all_columns = df.columns.tolist()
+# --- Column visibility ---
+all_columns = [c for c in df.columns if not c.startswith('_')]
 selected_columns = st.sidebar.multiselect(
     "📋 Show/Hide Columns:",
     options=all_columns,
@@ -102,7 +102,15 @@ if not selected_columns:
     st.warning("Please select at least one column to display.")
     st.stop()
 
+# --- Sort options ---
+st.sidebar.markdown("---")
+sort_col = st.sidebar.selectbox("↕️ Sort by:", options=["None"] + all_columns)
+if sort_col != "None":
+    sort_order = st.sidebar.radio("Order:", ["Ascending ↑", "Descending ↓"], horizontal=True)
+    ascending = sort_order == "Ascending ↑"
+
 # --- Master text search ---
+st.sidebar.markdown("---")
 search_query = st.sidebar.text_input("Search all text data:")
 
 filtered_df = df.copy()
@@ -113,12 +121,18 @@ if search_query:
 
 # --- Dropdown filters for categorical columns ---
 categorical_cols = [col for col in df.columns if df[col].nunique() < 20 and df[col].dtype == 'object'
-                    and col != 'Job Description']
+                    and col not in ('Job Description',) and not col.startswith('_')]
 
 for col in categorical_cols:
     options = sorted(df[col].dropna().unique().tolist())
     selected = st.sidebar.multiselect(f"Filter by {col}:", options=options, default=options)
     filtered_df = filtered_df[filtered_df[col].isin(selected)]
+
+# --- Apply sorting ---
+if sort_col != "None":
+    # Use raw numeric column for CTC/Gross sorting, display col otherwise
+    sort_key = '_ctc_raw' if sort_col == 'CTC(p.a)' else '_gross_raw' if sort_col == 'Gross(p.a)' else sort_col
+    filtered_df = filtered_df.sort_values(by=sort_key, ascending=ascending, na_position='last')
 
 # 4. Make Job Description clickable links
 def make_link(filename):
