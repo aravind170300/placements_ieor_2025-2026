@@ -39,7 +39,7 @@ def load_data():
         currency_map[r] = (ctc_sym, gross_sym)
 
     # --- Step 2: Load data with pandas ---
-    df_raw = pd.read_excel("placement_company_sheet_ieor.xlsx", skiprows=2)
+    df_raw = pd.read_excel("placements_ieor_sheet.xlsx", skiprows=2)
     df_raw = df_raw.loc[:, ~df_raw.columns.str.startswith('Unnamed')]
 
     # Track which rows were originally NaN in CTC (merged rows)
